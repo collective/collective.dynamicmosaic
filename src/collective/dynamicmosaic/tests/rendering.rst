@@ -317,15 +317,12 @@ the ``@@default-site-layout`` indirection view:
     ...     <body>
     ...         <h1>Welcome!</h1>
     ...         <div data-panel="panel1">
-    ...             Page panel 1
     ...             <div id="page-tile2" data-tile="./@@test.tile1/tile2?magicNumber:int=2">Page tile 2 placeholder</div>
     ...         </div>
     ...         <div data-panel="panel2">
-    ...             Page panel 2
     ...             <div id="page-tile3" data-tile="./@@test.tile1/tile3">Page tile 3 placeholder</div>
     ...         </div>
     ...         <div data-panel="panel4">
-    ...             Page panel 4 (ignored)
     ...             <div id="page-tile4" data-tile="./@@test.tile1/tile4">Page tile 4 placeholder</div>
     ...         </div>
     ...     </body>
@@ -389,7 +386,6 @@ working, it should perform its magic. We make sure that Zope is in
       <body>
             <h1>Welcome!</h1>
             <div data-panel="panel1">
-                Page panel 1
             <p>
                 This is a demo tile with id tile2
             </p>
@@ -398,7 +394,6 @@ working, it should perform its magic. We make sure that Zope is in
             </p>
             </div>
             <div data-panel="panel2">
-                Page panel 2
             <p>
                 This is a demo tile with id tile3
             </p>

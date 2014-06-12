@@ -4,7 +4,7 @@ from lxml import etree
 dynamictileXPath = etree.XPath("//*[@data-dynamic-tile]")
 
 
-def assign(request, pageTree):
+def assign(request, pageTree, tile_mapping={}):
     """Perform dynamic tile placing for the given page.
     """
 
@@ -15,14 +15,9 @@ def assign(request, pageTree):
         for node in dynamictileXPath(pageTree)
     )
 
-    # hardcode mapping for now -- WIP
-    slotmapping = {'A': './@@test.tile1/tile2?magicNumber:int=2',
-                   'B': './@@test.tile1/tile3',
-                   'X': './@@test.tile1/tile4'}
-
-    for (slotId, tile) in dynamicTiles.items():
-        if slotId in slotmapping:
+    for (id, tile) in dynamicTiles.items():
+        if id in tile_mapping:
             del tile.attrib['data-dynamic-tile']
-            tile.attrib['data-tile'] = slotmapping[slotId]
+            tile.attrib['data-tile'] = tile_mapping[id]
 
     return pageTree

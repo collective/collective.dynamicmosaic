@@ -107,6 +107,7 @@ defined first:
     >>> browser = Browser(app)
     >>> browser.handleErrors = False
 
+
 Creating a site layout
 ~~~~~~~~~~~~~~~~~~~~~~
 
@@ -339,14 +340,17 @@ Note the "data-dynamic-tile" attributes below - those will be changed into
     ... """
 
 We then register a view that simply return this HTML.
+To trigger the IDynamicMosaicAdapter lookup we mark this view as IDynamicMosaicEnabled.
 
 We do this in code for the purposes of the test, and we have to apply security
 because we will shortly render those pages using the test publisher. In real
 life, these could be registered using the standard ``<browser:page />`` directive.
 
     >>> from zope.publisher.browser import BrowserView
+    >>> from collective.dynamicmosaic.interfaces import IDynamicMosaicEnabled
 
     >>> class Page(BrowserView):
+    ...     implements(IDynamicMosaicEnabled)
     ...     __name__ = 'test-page'
     ...     def __call__(self):
     ...         return pageHTML
@@ -362,14 +366,43 @@ We register this view in the same way the ZCML handlers for ``<browser:page />``
 
     >>> InitializeClass(Page)
 
-    >>> provideAdapter(Page, (Interface, Interface,), Interface, u'test-page')
+    >>> provideAdapter(factory=Page, adapts=(Interface, Interface,), provides=Interface, name=u'test-page')
 
 
 Providing a dynamic layout adapter
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Finally we have to provide an adapter that decides which panels should be rendered
+We have to provide a multi-adapter that decides which panels should be rendered
 into which dynamic panel slot.
+
+
+    >>> from collective.dynamicmosaic.interfaces import IDynamicMosaicLayer
+    >>> from collective.dynamicmosaic.interfaces import IDynamicMosaicAssignment
+
+    >>> class DemoAssignment(object):
+    ...     def __init__(self, published, request):
+    ...         pass
+    ...     def tile_mapping(self):
+    ...         return {'A': './@@test.tile1/tile2?magicNumber:int=2',
+    ...                 'B': './@@test.tile1/tile3',
+    ...                 'D': './@@test.tile1/tile4'}
+
+    >>> provideAdapter(factory=DemoAssignment,
+    ...                adapts=(IDynamicMosaicEnabled, IDynamicMosaicLayer,),
+    ...                provides=IDynamicMosaicAssignment)
+
+This will perform a tile id substitution on the page layout, which is rendered from
+the IDynamicMosaicEnabled view.
+
+If we want to, we can also perform tile id subsitution on the site layout
+by marking that as IDynamicMosaicEnabled as well. However, in this test setup
+the ``published`` object signature is:
+
+``<bound method File.index_html of <File at /plone/portal_resources/sitelayout/mylayout/site.html>>``
+
+which cannot be marked with directlyProvides. If you want to dynamically transform site layouts
+as well, an option would be to register the adapter for ``(Interface, IDynamicMosaicLayer)`` and
+work out the appropriate contextual logic in the adapter implementation.
 
 
 Rendering the page

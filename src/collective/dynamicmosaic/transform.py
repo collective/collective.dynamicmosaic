@@ -1,7 +1,10 @@
 from plone.transformchain.interfaces import ITransform
 from zope.interface import implements
 from repoze.xmliter.serializer import XMLSerializer
+from zope.component import getMultiAdapter
 from collective.dynamicmosaic import dynamictiles
+from collective.dynamicmosaic.interfaces import IDynamicMosaicAssignment
+from zope.component.interfaces import ComponentLookupError
 
 
 class DynamicTiles(object):
@@ -27,7 +30,16 @@ class DynamicTiles(object):
                 not isinstance(result, XMLSerializer):
             return None
 
-        tree = dynamictiles.assign(self.request, result.tree)
+        try:
+            assignment = getMultiAdapter((self.published, self.request),
+                                         IDynamicMosaicAssignment)
+        except ComponentLookupError:
+            # pass unchanged
+            return result
+
+        tree = dynamictiles.assign(self.request,
+                                   result.tree,
+                                   assignment.tile_mapping())
         if tree is None:
             return None
 

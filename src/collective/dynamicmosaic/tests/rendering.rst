@@ -1,3 +1,18 @@
+Dynamic blocks rendering
+========================
+
+This package builds on the transform chain configured in plone.app.blocks.
+It adds to that an extra transform that generates page layouts from
+page layout templates.
+
+The intent is that a designer can create a generic page layout, but
+the decision of what content should be rendered there is made runtime.
+
+The doctest below is a twist on the rendering.rst test from plone.app.blocks.
+The numeric rendering steps are performed by plone.app.blocks.
+The alphabetic rendering steps are performed by collective.dynamicmosaic.
+
+
 Blocks rendering in detail
 ==========================
 
@@ -5,6 +20,36 @@ This doctest illustrates the blocks rendering process. At a high level, it
 consists of the following steps:
 
 0. Obtain the content page, an HTML document.
+
+
+   --- dynamicmosaic specific ---
+
+A. Look for dynamic panel slots in the content page template.
+
+   A dynamic panel is an element (usually a ``<div />``) in the layout page with a
+   data-dynamic-panel attribute, for example: ``<div data-dynamic-panel="A" />``.
+
+   The attribute specifies an id which *may* be used as a slot name into which
+   a concrete panel can be placed.
+
+   By convention, dynamic panel ids are single-letter capitals placed in the 
+   template in such a way that the most prominent slot is 'A', the second
+   most prominent slot is 'B' etc.
+
+B. Resolve and obtain an IDynamicMosaic adapter that provides a mapping
+   from dynamic panel slot id to concrete panel ids that can be resolved
+   by plone.app.blocks in step 3 below.
+
+C. Replace all dynamic panel ids with the concrete panel ids to be rendered.
+   This transforms our dynamicmosaic page layout template containing panel slots,
+   into a concrete plone.app.blocks page layout with concrete panel ids.
+
+D. (TODO: site layout monkeying?)
+
+   ---/ dynamicmosaic specific ---
+
+
+
 1. Look for a site layout link in the content page. This takes the form of an
    attribute on the html tag like ``<html data-layout="..." />``.
 
@@ -12,16 +57,20 @@ consists of the following steps:
    directory of type ``sitelayout``, e.g. ``/++sitelayout++foo/site.html``,
    although the layout can be any URL. An absolute path like this will be
    adjusted so that it is always relative to the Plone site root.
+
 2. Resolve and obtain the site layout. This is another HTML document.
+
 3. Extract panels from the site layout.
 
    A panel is an element (usually a ``<div />``) in the layout page with a
    data-panel attribute, for example: ``<div data-panel="panel1" />``. The
    attribute specifies an id which *may* be used in the content page.
+
 4. Merge panels. This is the process which applies the layout to the
    unstyled page. All panels in the layout page that have a matching
    element in the content page, are replaced by the content page element.
    The rest of the content page is discarded.
+
 5. Resolve and obtain tiles. A tile is a placeholder element in the page
    which will be replaced by the contents of a document referenced by a URL.
 
@@ -35,11 +84,13 @@ consists of the following steps:
 
    The ``plone.tiles`` package provides a framework for writing tiles,
    although in reality a tile can be any HTML page.
+
 6. Place tiles into the page. The tile should resolve to a full HTML
    document. Any content found in the ``<head />`` of the tile content will
    be merged into the ``<head />`` of the rendered content. The contents of
    the ``<body />`` of the tile content are put into the rendered document
    at the tile placeholder.
+
 
 Rendering step-by-step
 ----------------------
@@ -170,50 +221,19 @@ a given page, we can manage the default site layout centrally.
     >>> registry['plone.defaultSiteLayout'] = '/++sitelayout++mylayout/site.html'
     >>> transaction.commit()
 
-Creating a page layout and tiles
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Next, we will define the markup of a content page that uses this layout via
-the ``@@default-site-layout`` indirection view:
+Creating tiles
+~~~~~~~~~~~~~~
 
-    >>> pageHTML = """\
-    ... <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-    ... <html data-layout="./@@default-site-layout">
-    ...     <body>
-    ...         <h1>Welcome!</h1>
-    ...         <div data-panel="panel1">
-    ...             Page panel 1
-    ...             <div id="page-tile2" data-tile="./@@test.tile1/tile2?magicNumber:int=2">Page tile 2 placeholder</div>
-    ...         </div>
-    ...         <div data-panel="panel2">
-    ...             Page panel 2
-    ...             <div id="page-tile3" data-tile="./@@test.tile1/tile3">Page tile 3 placeholder</div>
-    ...         </div>
-    ...         <div data-panel="panel4">
-    ...             Page panel 4 (ignored)
-    ...             <div id="page-tile4" data-tile="./@@test.tile1/tile4">Page tile 4 placeholder</div>
-    ...         </div>
-    ...     </body>
-    ... </html>
-    ... """
-
-We then register a view that simply return this HTML, and a tile type
-which we can use to test tile rendering.
+We register a tile type which we can use to test tile rendering.
 
 We do this in code for the purposes of the test, and we have to apply security
 because we will shortly render those pages using the test publisher. In real
-life, these could be registered using the standard ``<browser:page />`` and
-``<plone:tile />`` directives.
+life, these could be registered using the standard ``<plone:tile />`` directive.
 
-    >>> from zope.publisher.browser import BrowserView
     >>> from zope.interface import Interface, implements
     >>> from zope import schema
     >>> from plone.tiles import Tile
-
-    >>> class Page(BrowserView):
-    ...     __name__ = 'test-page'
-    ...     def __call__(self):
-    ...         return pageHTML
 
     >>> class ITestTile(Interface):
     ...     magicNumber = schema.Int(title=u"Magic number", required=False)
@@ -254,7 +274,7 @@ be a tile that only needs to insert some CSS.
     ... </html>"""
 
 We register these views and tiles in the same way the ZCML handlers for
-``<browser:page />`` and ``<plone:tile />`` would:
+``<plone:tile />`` would:
 
     >>> from plone.tiles.type import TileType
     >>> from Products.Five.security import protectClass
@@ -275,17 +295,69 @@ We register these views and tiles in the same way the ZCML handlers for
     ...     description=u"Another tile used for testing",
     ...     add_permission="cmf.ManagePortal")
 
-    >>> protectClass(Page, 'zope2.View')
     >>> protectClass(TestTile, 'zope2.View')
 
-    >>> InitializeClass(Page)
     >>> InitializeClass(TestTile)
 
-    >>> provideAdapter(Page, (Interface, Interface,), Interface, u'test-page')
     >>> provideAdapter(TestTile, (Interface, Interface,), Interface, u'test.tile1',)
     >>> provideAdapter(TestTileNoBody, (Interface, Interface,), Interface, u'test.tile_nobody',)
     >>> provideUtility(testTileType, name=u'test.tile1')
     >>> provideUtility(testTileTypeNoBody, name=u'test.tile_nobody')
+
+
+Creating a page layout
+~~~~~~~~~~~~~~~~~~~~~~
+
+Next, we will define the markup of a content page that uses this layout via
+the ``@@default-site-layout`` indirection view:
+
+    >>> pageHTML = """\
+    ... <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+    ... <html data-layout="./@@default-site-layout">
+    ...     <body>
+    ...         <h1>Welcome!</h1>
+    ...         <div data-panel="panel1">
+    ...             Page panel 1
+    ...             <div id="page-tile2" data-tile="./@@test.tile1/tile2?magicNumber:int=2">Page tile 2 placeholder</div>
+    ...         </div>
+    ...         <div data-panel="panel2">
+    ...             Page panel 2
+    ...             <div id="page-tile3" data-tile="./@@test.tile1/tile3">Page tile 3 placeholder</div>
+    ...         </div>
+    ...         <div data-panel="panel4">
+    ...             Page panel 4 (ignored)
+    ...             <div id="page-tile4" data-tile="./@@test.tile1/tile4">Page tile 4 placeholder</div>
+    ...         </div>
+    ...     </body>
+    ... </html>
+    ... """
+
+We then register a view that simply return this HTML.
+
+We do this in code for the purposes of the test, and we have to apply security
+because we will shortly render those pages using the test publisher. In real
+life, these could be registered using the standard ``<browser:page />`` directive.
+
+    >>> from zope.publisher.browser import BrowserView
+
+    >>> class Page(BrowserView):
+    ...     __name__ = 'test-page'
+    ...     def __call__(self):
+    ...         return pageHTML
+
+We register this view in the same way the ZCML handlers for ``<browser:page />`` would:
+
+    >>> from Products.Five.security import protectClass
+    >>> from App.class_init import InitializeClass
+    >>> from zope.component import provideAdapter, provideUtility
+    >>> from zope.interface import Interface
+
+    >>> protectClass(Page, 'zope2.View')
+
+    >>> InitializeClass(Page)
+
+    >>> provideAdapter(Page, (Interface, Interface,), Interface, u'test-page')
+
 
 Rendering the page
 ~~~~~~~~~~~~~~~~~~
@@ -357,32 +429,4 @@ Notice how:
 * The tiles have been rendered, replacing the relevant placeholders
 * The ``<head />`` section from the rendered tiles has been merged into the
   ``<head />`` of the output page.
-
-Using VHM
-~~~~~~~~~~~~~~~~~~
-
-Make sure to have a clean browser ::
-
-    >>> browser = Browser(app)
-    >>> browser.handleErrors = False
-
-Using Virtual Host Monster we rewrite the url to consider all content being under /::
-
-    >>> vhm_url = 'http://nohost/VirtualHostBase/http/nohost:80/plone/VirtualHostRoot/'
-    >>> browser.open(vhm_url + '/@@test-page')
-
-Tiles should return an url according to this::
-
-    >>> 'Magic number: -1; Form: []; Query string: ; URL: http://nohost/@@test.tile1/tile2' in browser.contents
-    True
-
-Now we deal with _vh_* arguments. We expect our site to be under a subdir with id *subplone* ::
-
-    >>> vhm_url = 'http://nohost/VirtualHostBase/http/nohost:80/plone/VirtualHostRoot/_vh_subplone'
-    >>> browser.open(vhm_url + '/@@test-page')
-
-Tiles should return an url according to this::
-
-    >>> 'Magic number: -1; Form: []; Query string: ; URL: http://nohost/subplone/@@test.tile1/tile2' in browser.contents
-    True
 

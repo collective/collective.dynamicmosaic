@@ -1,0 +1,6 @@
+*~
+*py?
+*.egg-info
+dist/
+Paste*.egg
+*.mo

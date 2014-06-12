@@ -41,6 +41,8 @@ setup(
     zip_safe=False,
     install_requires=[
         'setuptools',
+        'plone.app.blocks',
+        'plone.transformchain',
         # -*- Extra requirements: -*-
     ],
     extras_require={'test': ['plone.app.testing']},

@@ -21,35 +21,6 @@ consists of the following steps:
 
 0. Obtain the content page, an HTML document.
 
-
-   --- dynamicmosaic specific ---
-
-A. Look for dynamic panel slots in the content page template.
-
-   A dynamic panel is an element (usually a ``<div />``) in the layout page with a
-   data-dynamic-panel attribute, for example: ``<div data-dynamic-panel="A" />``.
-
-   The attribute specifies an id which *may* be used as a slot name into which
-   a concrete panel can be placed.
-
-   By convention, dynamic panel ids are single-letter capitals placed in the 
-   template in such a way that the most prominent slot is 'A', the second
-   most prominent slot is 'B' etc.
-
-B. Resolve and obtain an IDynamicMosaic adapter that provides a mapping
-   from dynamic panel slot id to concrete panel ids that can be resolved
-   by plone.app.blocks in step 3 below.
-
-C. Replace all dynamic panel ids with the concrete panel ids to be rendered.
-   This transforms our dynamicmosaic page layout template containing panel slots,
-   into a concrete plone.app.blocks page layout with concrete panel ids.
-
-D. (TODO: site layout monkeying?)
-
-   ---/ dynamicmosaic specific ---
-
-
-
 1. Look for a site layout link in the content page. This takes the form of an
    attribute on the html tag like ``<html data-layout="..." />``.
 
@@ -70,6 +41,35 @@ D. (TODO: site layout monkeying?)
    unstyled page. All panels in the layout page that have a matching
    element in the content page, are replaced by the content page element.
    The rest of the content page is discarded.
+
+
+
+   --- dynamicmosaic specific ---
+
+A. Look for dynamic tile slots in the content page template.
+
+   A dynamic tile is an element (usually a ``<div />``) in the layout page with a
+   data-dynamic-tile attribute, for example: ``<div data-dynamic-tile="A" />``.
+
+   The attribute specifies an id which *may* be used as a slot name into which
+   a concrete tile id can be placed.
+
+   By convention, dynamic tile ids are single-letter capitals placed in the 
+   template in such a way that the most prominent slot is 'A', the second
+   most prominent slot is 'B' etc.
+
+B. Resolve and obtain an IDynamicMosaic adapter that provides a mapping
+   from dynamic tile slot id to concrete tile ids that can be resolved
+   by plone.app.blocks in step 5 below.
+
+C. Replace all dynamic tile ids with the concrete tile ids to be rendered.
+   This transforms our dynamicmosaic page layout template containing tile slots,
+   into a concrete plone.app.blocks page layout with concrete tile ids.
+
+
+   ---/ dynamicmosaic specific ---
+
+
 
 5. Resolve and obtain tiles. A tile is a placeholder element in the page
    which will be replaced by the contents of a document referenced by a URL.
@@ -179,10 +179,15 @@ This resource can now be accessed using the path
 that.
 
     >>> browser.open(portal.absolute_url() + '/++sitelayout++mylayout/site.html')
-    >>> print browser.contents
+
+Because of an annoying lxml cross-platform output inconsistency, we need to sanitize
+the output a bit.
+
+    >>> print browser.contents.replace('<head><meta', '<head>\n\t<meta')
     <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
     <html xmlns="http://www.w3.org/1999/xhtml">
-      <head><meta http-equiv="Content-Type" content="text/html; charset=ASCII" />
+      <head>
+          <meta http-equiv="Content-Type" content="text/html; charset=ASCII" />
           <title>Layout title</title>
           <link rel="stylesheet" href="/layout/style.css" />
           <script type="text/javascript">alert('layout');</script>
@@ -308,8 +313,12 @@ We register these views and tiles in the same way the ZCML handlers for
 Creating a page layout
 ~~~~~~~~~~~~~~~~~~~~~~
 
-Next, we will define the markup of a content page that uses this layout via
-the ``@@default-site-layout`` indirection view:
+Here, we do something special. Instead of defining a layout that directly
+specifies the panel ids to be rendered, we here define a layout _template_
+that will be used to generate the concrete layout.
+
+Note the "data-dynamic-tile" attributes below - those will be changed into
+"data-tile" attributes to reflect our intended tile assignment.
 
     >>> pageHTML = """\
     ... <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
@@ -317,13 +326,13 @@ the ``@@default-site-layout`` indirection view:
     ...     <body>
     ...         <h1>Welcome!</h1>
     ...         <div data-panel="panel1">
-    ...             <div id="page-tile2" data-tile="./@@test.tile1/tile2?magicNumber:int=2">Page tile 2 placeholder</div>
+    ...             <div id="page-tile2" data-dynamic-tile="A">slot A (will become tile2)</div>
     ...         </div>
     ...         <div data-panel="panel2">
-    ...             <div id="page-tile3" data-tile="./@@test.tile1/tile3">Page tile 3 placeholder</div>
+    ...             <div id="page-tile3" data-dynamic-tile="B">Slot B (will become tile 3)</div>
     ...         </div>
     ...         <div data-panel="panel4">
-    ...             <div id="page-tile4" data-tile="./@@test.tile1/tile4">Page tile 4 placeholder</div>
+    ...             <div id="page-tile4" data-dynamic-tile="X">Slot X (ignored)</div>
     ...         </div>
     ...     </body>
     ... </html>
@@ -356,6 +365,13 @@ We register this view in the same way the ZCML handlers for ``<browser:page />``
     >>> provideAdapter(Page, (Interface, Interface,), Interface, u'test-page')
 
 
+Providing a dynamic layout adapter
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Finally we have to provide an adapter that decides which panels should be rendered
+into which dynamic panel slot.
+
+
 Rendering the page
 ~~~~~~~~~~~~~~~~~~
 
@@ -364,10 +380,11 @@ working, it should perform its magic. We make sure that Zope is in
 "development mode" to get pretty-printed output.
 
     >>> browser.open(portal.absolute_url() + '/@@test-page')
-    >>> print browser.contents
+    >>> print browser.contents.replace('<head><meta', '<head>\n\t<meta')
     <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
     <html xmlns="http://www.w3.org/1999/xhtml">
-      <head><meta http-equiv="Content-Type" content="text/html; charset=ASCII" />
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=ASCII" />
         <title>Layout title</title>
         <link rel="stylesheet" href="/layout/style.css" />
         <script type="text/javascript">alert('layout');</script>

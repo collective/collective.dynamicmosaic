@@ -16,6 +16,13 @@
       description="Installs the collective.dynamicmosaic package"
       provides="Products.GenericSetup.interfaces.EXTENSION"
       />
-  <!-- -*- extra stuff goes here -*- -->
+
+    <!-- 8100: after xml parse, before panelmerge, place dynamic panels -->
+    <adapter
+        for="* .interfaces.IDynamicMosaicLayer"
+        name="collective.dynamicmosaic.dynamictiles"
+        factory=".transform.DynamicTiles"
+        />
+    
 
 </configure>

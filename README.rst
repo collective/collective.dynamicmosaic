@@ -18,6 +18,15 @@ policies at will.
 
 .. _plone.app.blocks: http://github.com/plone/plone.app.blocks
 
+Dependencies
+------------
+
+While this package was created during the Mosaic sprint Barcelona, it does *not* depend
+on `plone.app.mosaic`_.
+
+It only depends on `plone.app.blocks`_ and it's dependencies (notably `plone.app.transformchain`_).
+
+So you can use this without using the mosaic editor.
 
 Status
 ------
@@ -31,6 +40,47 @@ because they need plone.app.blocks commit 07f6fc2a7a660de519f3c4bcfe146d4e7cb57f
     :alt: Travis CI badge
     :target: http://travis-ci.org/collective/collective.dynamicmosaic
 
+
+Why use collective.dynamicmosaic?
+=================================
+
+Suppose you have a collection of page designs.
+And a collection of tiles, i.e. page elements.
+But you want to be flexible in which tiles get rendered where,
+for example because you want to do run-time personalisation.
+
+That's why. Instead of having to hand-craft all rendering variations,
+you can re-use page layouts and page elements and let a
+run-time logic adapter decide on the combinations of these.
+
+Using collective.dynamicmosaic
+==============================
+
+As an integrator, you need to perform the following steps to do something useful
+with this package:
+
+1. Add ``collective.dynamicmosaic`` to your buildout::
+
+     [instance]
+     eggs += collective.dynamicmosaic
+
+2. Create a ``site layout`` template and register that as a browser resource.
+   See tests/rendering.rst for an example simple site layout.
+   In your own implementation you can register that via zcml.
+
+3. Create a ``page layout`` template that references the ``site layout``
+   and wrap that page layout into a browser view that returns the page layout
+   on ``__call__()``.
+   Again, see the doctest for an example.
+   Note that these are not TAL templates.
+
+4. In the two templates mentioned above, create some tile slots you'd like to fill.
+
+5. Create an assignment policy that maps specific tiles into the slots.
+   The assignment policy should provide ``IDynamicMosaicAssignment``
+   and adapt ``(IDynamicMosaicEnabled, IDynamicMosaicLayer)``.
+
+All of this is demo-ed in the doctest.
 
 Dynamic blocks rendering in detail
 ==================================

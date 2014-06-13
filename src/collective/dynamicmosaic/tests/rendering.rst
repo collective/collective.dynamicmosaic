@@ -154,6 +154,7 @@ content inside and outside panels. The tiles in this case are managed by
     ...             Layout panel 3
     ...             <div id="layout-tile2" data-tile="./@@test.tile1/tile2">Layout tile 2 placeholder</div>
     ...         </div>
+    ...         <div id="layout-tile5" data-tile="./@@test.tile1/tile5">Layout tile 5 placeholder</div>
     ...     </body>
     ... </html>
     ... """
@@ -212,6 +213,7 @@ the output a bit.
                 Layout panel 3
                 <div id="layout-tile2" data-tile="./@@test.tile1/tile2">Layout tile 2 placeholder</div>
             </div>
+            <div id="layout-tile5" data-tile="./@@test.tile1/tile5">Layout tile 5 placeholder</div>   
         </body>
     </html>
 
@@ -333,7 +335,7 @@ Note the "data-dynamic-tile" attributes below - those will be changed into
     ...             <div id="page-tile3" data-dynamic-tile="B">Slot B (will become tile 3)</div>
     ...         </div>
     ...         <div data-panel="panel4">
-    ...             <div id="page-tile4" data-dynamic-tile="X">Slot X (ignored)</div>
+    ...             <div id="page-tile4" data-dynamic-tile="C">Slot C (ignored)</div>
     ...         </div>
     ...     </body>
     ... </html>
@@ -432,6 +434,7 @@ working, it should perform its magic. We make sure that Zope is in
         <meta name="tile-name" content="tile2" />
         <meta name="tile-name" content="tile3" />
         <meta name="tile-name" content="tile2" />
+        <meta name="tile-name" content="tile5" />
       </head>
       <body>
             <h1>Welcome!</h1>
@@ -460,6 +463,12 @@ working, it should perform its magic. We make sure that Zope is in
                 Magic number: -1; Form: []; Query string: ; URL: http://nohost/plone/@@test.tile1/tile2
             </p>
             </div>
+            <p>
+                This is a demo tile with id tile5
+            </p>
+            <p>
+                Magic number: -1; Form: []; Query string: ; URL: http://nohost/plone/@@test.tile1/tile5
+            </p>
         </body>
     </html>
     <BLANKLINE>

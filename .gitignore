@@ -4,3 +4,8 @@
 dist/
 Paste*.egg
 *.mo
+.installed.cfg
+bin/
+buildout-cache/
+develop-eggs
+parts/

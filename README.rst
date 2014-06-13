@@ -1,7 +1,11 @@
-.. contents::
+.. contents
 
 Introduction
 ============
+
+.. image:: http://cosent.nl/images/mosaic.png/@@images/image/mini
+     :alt: Plone Mosaic
+     :align: right
 
 This package builds on the transform chain configured in `plone.app.blocks`_.
 It adds to that an extra transform that makes it possible to assign tiles
@@ -11,6 +15,19 @@ The intent is that a designer can create generic page and site layouts,
 but the decision of what content should be rendered where is made runtime.
 A pluggable adapter architecture makes it possible to configure rendering
 policies at will.
+
+
+Status
+------
+
+Unreleased.
+
+Requires an as of yet unreleased version of plone.app.blocks or tests will break
+because they need plone.app.blocks commit 07f6fc2a7a660de519f3c4bcfe146d4e7cb57f65.
+
+.. image:: https://secure.travis-ci.org/collective/collective.dynamicmosaic?branch=master
+    :alt: Travis CI badge
+    :target: http://travis-ci.org/collective/collective.dynamicmosaic
 
 
 Dynamic blocks rendering in detail

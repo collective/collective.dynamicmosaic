@@ -3,11 +3,7 @@
 Introduction
 ============
 
-.. image:: http://cosent.nl/images/mosaic.png/@@images/image/mini
-     :alt: Plone Mosaic
-     :align: right
-
-This package builds on the transform chain configured in `plone.app.blocks`_.
+|mosaic| This package builds on the transform chain configured in `plone.app.blocks`_.
 It adds to that an extra transform that makes it possible to assign tiles
 to tile slots at render-time.
 
@@ -15,6 +11,12 @@ The intent is that a designer can create generic page and site layouts,
 but the decision of what content should be rendered where is made runtime.
 A pluggable adapter architecture makes it possible to configure rendering
 policies at will.
+
+.. |mosaic| image:: http://cosent.nl/images/mosaic.png/@@images/image/mini
+     :alt: Plone Mosaic
+     :align: right
+
+.. _plone.app.blocks: http://github.com/plone/plone.app.blocks
 
 
 Status
@@ -113,4 +115,3 @@ plone.app.blocks again
    at the tile placeholder.
 
 
-.. _plone.app.blocks: http://github.com/plone/plone.app.blocks

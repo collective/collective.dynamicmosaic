@@ -22,7 +22,7 @@ Status
 Unreleased.
 
 Requires an as of yet unreleased version of plone.app.blocks or tests will break
-because they need plone.app.blocks commit 07f6fc2a7a660de519f3c4bcfe146d4e7cb57f65.
+because they need plone.app.blocks#07f6fc2a7a660de519f3c4bcfe146d4e7cb57f65.
 
 .. image:: https://secure.travis-ci.org/collective/collective.dynamicmosaic?branch=master
     :alt: Travis CI badge
@@ -37,16 +37,16 @@ on `plone.app.mosaic`_.
 
 It only depends on `plone.app.blocks`_ and its dependencies (notably `plone.transformchain`_).
 
-You can use ``collective.dynamicmosaic`` in Plone 4.3 without using the ``plone.app.mosaic`` editor.
+You can use *collective.dynamicmosaic* in Plone 4.3 without using the *plone.app.mosaic* editor.
 In a sense, these two packages have different approaches to solving the same problem -
 how to create and manage composite pages.
 
-* plone.app.mosaic provides a WYSIWIG interface for editors crafting pages from tiles.
+* **plone.app.mosaic** provides a WYSIWIG interface for editors crafting pages from tiles.
   In this case page composition is defined edit-time by a human editor.
   Typically, site layouts would be provided by a themer and page layouts created through the web
   by an editor in "content space".
 
-* collective.dynamicmosaic provides a python API for compositing pages from tiles programmatically.
+* **collective.dynamicmosaic** provides a python API for compositing pages from tiles programmatically.
   In this case page composition is determined render-time by coded logic.
   Typically, both site layouts and page layouts (content layouts) would be provided by a themer,
   while the rendering policy would be encoded by a developer in filesystem code.
@@ -81,12 +81,12 @@ with this package:
      [instance]
      eggs += collective.dynamicmosaic
 
-2. Create a ``site layout`` template and register that as a browser resource.
+2. Create a *site layout* template and register that as a browser resource.
    See `tests/rendering.rst`_ for an example simple site layout.
    In your own implementation you can register that via zcml.
 
-3. Create a ``page layout`` template that references the ``site layout``
-   and wrap that page layout into a browser view that returns the page layout
+3. Create a *page layout* template that references the *site layout*
+   and wrap that *page layout* into a browser view that returns the *page layout*
    on ``__call__()``.
    Again, see the `tests/rendering.rst`_ doctest for an example.
    Note that these are not TAL templates.

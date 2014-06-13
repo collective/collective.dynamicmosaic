@@ -9,7 +9,22 @@ from zope.component.interfaces import ComponentLookupError
 
 class DynamicTiles(object):
     """Replace dynamic tile slot ids with actual tile ids to be rendered.
-    """
+
+    Note that this transform is typically called twice:
+
+    - once for the site layout resource with a ``published`` object signature of:
+      ``<bound method File.index_html of <File at /plone/portal_resources/sitelayout/mylayout/site.html>>``
+
+    - once for the merged page with a ``pusblished`` signature of the Page View that
+      is the initial entry point, and to which the IDynamicMosaicAssignment adapter will be bound.
+
+    Because the dynamic tiles transformation is chained *after* the plone.app.blocks panelmerge,
+    the second invocation will do tile replacements on the whole merged page, including not only
+    the page layout but also the site layout.
+
+    The upshot of this is, that this enables dynamic tile replacements of site layout tiles,
+    without the need to bind the adapter to the site layout resource.
+    """ # flake8:noqa
 
     implements(ITransform)
 

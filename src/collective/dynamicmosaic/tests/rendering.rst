@@ -154,10 +154,13 @@ content inside and outside panels. The tiles in this case are managed by
     ...             Layout panel 3
     ...             <div id="layout-tile2" data-tile="./@@test.tile1/tile2">Layout tile 2 placeholder</div>
     ...         </div>
-    ...         <div id="layout-tile5" data-tile="./@@test.tile1/tile5">Layout tile 5 placeholder</div>
+    ...         <div id="layout-tile5" data-dynamic-tile="E">Layout tile 5 placeholder</div>
     ...     </body>
     ... </html>
     ... """
+
+Note that we're setting a dynamic tile in the site layout here, to demonstrate how the dynamicmosaic
+transformation also affects the site layout.
 
 We can create an in-ZODB resource directory of type ``sitelayout`` that
 contains this layout. Another way would be to register a resource directory
@@ -213,7 +216,7 @@ the output a bit.
                 Layout panel 3
                 <div id="layout-tile2" data-tile="./@@test.tile1/tile2">Layout tile 2 placeholder</div>
             </div>
-            <div id="layout-tile5" data-tile="./@@test.tile1/tile5">Layout tile 5 placeholder</div>   
+            <div id="layout-tile5" data-dynamic-tile="E">Layout tile 5 placeholder</div>   
         </body>
     </html>
 
@@ -387,7 +390,8 @@ into which dynamic panel slot.
     ...     def tile_mapping(self):
     ...         return {'A': './@@test.tile1/tile2?magicNumber:int=2',
     ...                 'B': './@@test.tile1/tile3',
-    ...                 'D': './@@test.tile1/tile4'}
+    ...                 'D': './@@test.tile1/tile4',
+    ...                 'E': './@@test.tile1/tile5'}
 
     >>> provideAdapter(factory=DemoAssignment,
     ...                adapts=(IDynamicMosaicEnabled, IDynamicMosaicLayer,),
@@ -396,15 +400,12 @@ into which dynamic panel slot.
 This will perform a tile id substitution on the page layout, which is rendered from
 the IDynamicMosaicEnabled view.
 
-If we want to, we can also perform tile id subsitution on the site layout
-by marking that as IDynamicMosaicEnabled as well. However, in this test setup
-the ``published`` object signature is:
+Because at this stage in the transform chain, the page layout and site layout already 
+have been merged (in plone.app.blocks), the tile id substitution also affects dynamic
+tiles that are present in the site layout.
 
-``<bound method File.index_html of <File at /plone/portal_resources/sitelayout/mylayout/site.html>>``
-
-which cannot be marked with directlyProvides. If you want to dynamically transform site layouts
-as well, an option would be to register the adapter for ``(Interface, IDynamicMosaicLayer)`` and
-work out the appropriate contextual logic in the adapter implementation.
+So this transform makes it possible to rearrange tiles across the whole page,
+not just the content area.
 
 
 Rendering the page
@@ -473,7 +474,7 @@ working, it should perform its magic. We make sure that Zope is in
     </html>
     <BLANKLINE>
 
-Notice how:
+Notice how plone.app.blocks performed the following:
 
 * Panels from the page have been merged into the layout, replacing the
   corresponding panels there.
@@ -484,3 +485,9 @@ Notice how:
 * The ``<head />`` section from the rendered tiles has been merged into the
   ``<head />`` of the output page.
 
+Notice how collective.dynamicmosaic performed the following:
+
+* Replaced all data-dynamic-tile ids with the data-tile ids provided by the pluggable
+  IDynamicTilesAssignment adapter.
+* This dynamic id replacement affects both the page layout (content) and site layout
+  i.e. is executed across the whole page.

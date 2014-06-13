@@ -3,7 +3,7 @@
 Introduction
 ============
 
-|mosaic| This package builds on the transform chain configured in `plone.app.blocks`_.
+This package builds on the transform chain configured in `plone.app.blocks`_.
 It adds to that an extra transform that makes it possible to assign tiles
 to tile slots at render-time.
 
@@ -12,7 +12,7 @@ but the decision of what content should be rendered where is made runtime.
 A pluggable adapter architecture makes it possible to configure rendering
 policies at will.
 
-.. |mosaic| image:: http://cosent.nl/images/mosaic.png/@@images/image/mini
+.. image:: http://cosent.nl/images/mosaic.png/@@images/image/mini
      :alt: Plone Mosaic
      :align: right
 

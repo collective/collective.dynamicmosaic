@@ -2,11 +2,13 @@ Dynamic blocks rendering
 ========================
 
 This package builds on the transform chain configured in plone.app.blocks.
-It adds to that an extra transform that generates page layouts from
-page layout templates.
+It adds to that an extra transform that makes it possible to assign tiles
+to tile slots at render-time.
 
-The intent is that a designer can create a generic page layout, but
-the decision of what content should be rendered there is made runtime.
+The intent is that a designer can create generic page and site layouts,
+but the decision of what content should be rendered where is made runtime.
+A pluggable adapter architecture makes it possible to configure rendering
+policies at will.
 
 The doctest below is a twist on the rendering.rst test from plone.app.blocks.
 The numeric rendering steps are performed by plone.app.blocks.
@@ -44,7 +46,7 @@ consists of the following steps:
 
 
 
-   --- dynamicmosaic specific ---
+.:.   --- dynamicmosaic specific ---
 
 A. Look for dynamic tile slots in the content page template.
 
@@ -63,12 +65,14 @@ B. Resolve and obtain an IDynamicMosaic adapter that provides a mapping
    by plone.app.blocks in step 5 below.
 
 C. Replace all dynamic tile ids with the concrete tile ids to be rendered.
-   This transforms our dynamicmosaic page layout template containing tile slots,
-   into a concrete plone.app.blocks page layout with concrete tile ids.
+   Because this step occurs *after* the panel merging (4. above) it affects
+   all tile slots, whether defined in the page layout or in the site layout.
+
+   The injected data-tile ids will then be expanded into the actual tile
+   renderings in step 5. below.
 
 
-   ---/ dynamicmosaic specific ---
-
+.:.   ---/ dynamicmosaic specific ---
 
 
 5. Resolve and obtain tiles. A tile is a placeholder element in the page

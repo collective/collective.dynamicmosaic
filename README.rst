@@ -18,9 +18,8 @@ Dynamic blocks rendering in detail
 
 At a high level, the rendering process consists of the following steps:
 
-   The numeric rendering steps are performed by plone.app.blocks.
-   The alphabetic rendering steps are performed by collective.dynamicmosaic.
-
+plone.app.blocks
+----------------
 
 0. Obtain the content page, an HTML document.
 
@@ -46,13 +45,13 @@ At a high level, the rendering process consists of the following steps:
    The rest of the content page is discarded.
 
 
+collective.dynamicmosaic
+------------------------
 
-.:.   --- dynamicmosaic specific ---
-
-A. Look for dynamic tile slots in the content page template.
+5. Look for dynamic tile slots in the content page template.
 
    A dynamic tile is an element (usually a ``<div />``) in the layout page with a
-   data-dynamic-tile attribute, for example: ``<div data-dynamic-tile="A" />``.
+   ``data-dynamic-tile`` attribute, for example: ``<div data-dynamic-tile="A" />``.
 
    The attribute specifies an id which *may* be used as a slot name into which
    a concrete tile id can be placed.
@@ -61,22 +60,22 @@ A. Look for dynamic tile slots in the content page template.
    template in such a way that the most prominent slot is 'A', the second
    most prominent slot is 'B' etc.
 
-B. Resolve and obtain an IDynamicMosaic adapter that provides a mapping
+6. Resolve and obtain an ``IDynamicMosaicAssignment`` adapter that provides a mapping
    from dynamic tile slot id to concrete tile ids that can be resolved
    by plone.app.blocks in step 5 below.
 
-C. Replace all dynamic tile ids with the concrete tile ids to be rendered.
+7. Replace all dynamic ``data-dynamic-tile`` ids with concrete ``data-tile`` ids.
    Because this step occurs *after* the panel merging (4. above) it affects
    all tile slots, whether defined in the page layout or in the site layout.
 
-   The injected data-tile ids will then be expanded into the actual tile
-   renderings in step 5. below.
+   The injected ``data-tile`` ids will then be expanded into the actual tile
+   renderings by plone.app.blocks below.
 
 
-.:.   ---/ dynamicmosaic specific ---
+plone.app.blocks again
+----------------------
 
-
-5. Resolve and obtain tiles. A tile is a placeholder element in the page
+8. Resolve and obtain tiles. A tile is a placeholder element in the page
    which will be replaced by the contents of a document referenced by a URL.
 
    A tile is identified by a placeholder element with a ``data-tile``
@@ -90,7 +89,7 @@ C. Replace all dynamic tile ids with the concrete tile ids to be rendered.
    The ``plone.tiles`` package provides a framework for writing tiles,
    although in reality a tile can be any HTML page.
 
-6. Place tiles into the page. The tile should resolve to a full HTML
+9. Place tiles into the page. The tile should resolve to a full HTML
    document. Any content found in the ``<head />`` of the tile content will
    be merged into the ``<head />`` of the rendered content. The contents of
    the ``<body />`` of the tile content are put into the rendered document

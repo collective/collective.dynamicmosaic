@@ -14,6 +14,20 @@ The doctest below is a twist on the rendering.rst test from plone.app.blocks.
 The numeric rendering steps are performed by plone.app.blocks.
 The alphabetic rendering steps are performed by collective.dynamicmosaic.
 
+On testing
+----------
+
+Ideally one would prefer more granular unit and integration tests above the
+single monolithic doctest below. However, the reality is that the core of this
+package is a simple string replacement using a dict lookup and the complexity
+resides not in this replacement, but in the integration that hooks up this
+transform in the handling of every page view. Consequently, it's the integration
+that is both the most difficult to understand and also most difficult to test.
+
+Additionally, since string replacement in HTML pages is at the heart of what's
+happening here, there's no avoiding of the inherent brittleness you get when
+comparing generated HTML output to expected HTML output.
+
 
 Blocks rendering in detail
 ==========================
@@ -21,7 +35,7 @@ Blocks rendering in detail
 This doctest illustrates the blocks rendering process. At a high level, it
 consists of the following steps:
 
-0. Obtain the content page, an HTML document.
+0. Obtain the content page, an HTML document returned from a BrowserView.
 
 1. Look for a site layout link in the content page. This takes the form of an
    attribute on the html tag like ``<html data-layout="..." />``.

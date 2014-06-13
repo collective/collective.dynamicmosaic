@@ -16,18 +16,6 @@ policies at will.
      :alt: Plone Mosaic
      :align: right
 
-.. _plone.app.blocks: http://github.com/plone/plone.app.blocks
-
-Dependencies
-------------
-
-While this package was created during the Mosaic sprint Barcelona, it does *not* depend
-on `plone.app.mosaic`_.
-
-It only depends on `plone.app.blocks`_ and it's dependencies (notably `plone.app.transformchain`_).
-
-So you can use this without using the mosaic editor.
-
 Status
 ------
 
@@ -39,6 +27,29 @@ because they need plone.app.blocks commit 07f6fc2a7a660de519f3c4bcfe146d4e7cb57f
 .. image:: https://secure.travis-ci.org/collective/collective.dynamicmosaic?branch=master
     :alt: Travis CI badge
     :target: http://travis-ci.org/collective/collective.dynamicmosaic
+
+
+Dependencies
+------------
+
+This package was created during the Mosaic sprint Barcelona, but does *not* depend
+on `plone.app.mosaic`_.
+
+It only depends on `plone.app.blocks`_ and its dependencies (notably `plone.transformchain`_).
+
+You can use ``collective.dynamicmosaic`` in Plone 4.3 without using the ``plone.app.mosaic`` editor.
+In a sense, these two packages have different approaches to solving the same problem -
+how to create and manage composite pages.
+
+* plone.app.mosaic provides a WYSIWIG interface for editors crafting pages from tiles.
+  In this case page composition is defined edit-time by a human editor.
+  Typically, site layouts would be provided by a themer and page layouts created through the web
+  by an editor in "content space".
+
+* collective.dynamicmosaic provides a python API for compositing pages from tiles programmatically.
+  In this case page composition is determined render-time by coded logic.
+  Typically, both site layouts and page layouts (content layouts) would be provided by a themer,
+  while the rendering policy would be encoded by a developer in filesystem code.
 
 
 Why use collective.dynamicmosaic?
@@ -53,6 +64,12 @@ That's why. Instead of having to hand-craft all rendering variations,
 you can re-use page layouts and page elements and let a
 run-time logic adapter decide on the combinations of these.
 
+Typical applications would include personalized landing pages with tiles
+chosen and ordered in a way that reflects known user characteristics,
+or workspace dashboards that vary tile presentation based on content
+structure and recent activity.
+
+
 Using collective.dynamicmosaic
 ==============================
 
@@ -65,13 +82,13 @@ with this package:
      eggs += collective.dynamicmosaic
 
 2. Create a ``site layout`` template and register that as a browser resource.
-   See tests/rendering.rst for an example simple site layout.
+   See `tests/rendering.rst`_ for an example simple site layout.
    In your own implementation you can register that via zcml.
 
 3. Create a ``page layout`` template that references the ``site layout``
    and wrap that page layout into a browser view that returns the page layout
    on ``__call__()``.
-   Again, see the doctest for an example.
+   Again, see the `tests/rendering.rst`_ doctest for an example.
    Note that these are not TAL templates.
 
 4. In the two templates mentioned above, create some tile slots you'd like to fill.
@@ -80,17 +97,20 @@ with this package:
    The assignment policy should provide ``IDynamicMosaicAssignment``
    and adapt ``(IDynamicMosaicEnabled, IDynamicMosaicLayer)``.
 
-All of this is demo-ed in the doctest.
+All of this is demo-ed in the `tests/rendering.rst`_ doctest.
+
 
 Dynamic blocks rendering in detail
 ==================================
 
-At a high level, the rendering process consists of the following steps:
+At a high level, the rendering process consists of the following steps,
+some of which are performed by plone.app.blocks and some of which are
+performed here in collective.dynamicmosaic:
 
 plone.app.blocks
 ----------------
 
-0. Obtain the content page, an HTML document.
+0. Obtain the content page, an HTML document returned from a BrowserView.
 
 1. Look for a site layout link in the content page. This takes the form of an
    attribute on the html tag like ``<html data-layout="..." />``.
@@ -165,3 +185,13 @@ plone.app.blocks again
    at the tile placeholder.
 
 
+Example
+=======
+
+See the `tests/rendering.rst`_ doctest for a fully worked example implementation.
+
+
+.. _plone.app.mosaic: http://github.com/plone/plone.app.mosaic
+.. _plone.app.blocks: http://github.com/plone/plone.app.blocks
+.. _plone.transformchain: http://github.com/plone/plone.transformchain
+.. _tests/rendering.rst: https://github.com/collective/collective.dynamicmosaic/blob/master/src/collective/dynamicmosaic/tests/rendering.rst

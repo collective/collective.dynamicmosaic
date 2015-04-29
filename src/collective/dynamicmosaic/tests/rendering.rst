@@ -202,28 +202,23 @@ This resource can now be accessed using the path
 that.
 
     >>> browser.open(portal.absolute_url() + '/++sitelayout++mylayout/site.html')
-
-Because of an annoying lxml cross-platform output inconsistency, we need to sanitize
-the output a bit.
-
-    >>> print browser.contents.replace('<head><meta', '<head>\n\t<meta')
+    >>> print browser.contents
     <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-    <html xmlns="http://www.w3.org/1999/xhtml">
-      <head>
-          <meta http-equiv="Content-Type" content="text/html; charset=ASCII" />
-          <title>Layout title</title>
-          <link rel="stylesheet" href="/layout/style.css" />
-          <script type="text/javascript">alert('layout');</script>
-        <style type="text/css">
+    <html>
+        <head>
+            <title>Layout title</title>
+            <link rel="stylesheet" href="/layout/style.css" />
+            <script type="text/javascript">alert('layout');</script>
+            <style type="text/css">
             div {
                 margin: 5px;
                 border: dotted black 1px;
                 padding: 5px;
             }
             </style>
-        <link rel="stylesheet" data-tile="./@@test.tile_nobody/tile_css" />
-          </head>
-          <body>
+            <link rel="stylesheet" data-tile="./@@test.tile_nobody/tile_css" />
+        </head>
+        <body>
             <h1>Welcome!</h1>
             <div data-panel="panel1">Layout panel 1</div>
             <div data-panel="panel2">
@@ -234,9 +229,10 @@ the output a bit.
                 Layout panel 3
                 <div id="layout-tile2" data-tile="./@@test.tile1/tile2">Layout tile 2 placeholder</div>
             </div>
-            <div id="layout-tile5" data-dynamic-tile="E">Layout tile 5 placeholder</div>   
+            <div id="layout-tile5" data-dynamic-tile="E">Layout tile 5 placeholder</div>
         </body>
     </html>
+
 
 We can now set this as the site-wide default layout by setting the registry
 key ``plone.defaultSiteLayout``. There are two indirection views,
@@ -434,6 +430,10 @@ working, it should perform its magic. We make sure that Zope is in
 "development mode" to get pretty-printed output.
 
     >>> browser.open(portal.absolute_url() + '/@@test-page')
+
+Because of an annoying lxml cross-platform output inconsistency, we need to sanitize
+the output a bit.
+
     >>> print browser.contents.replace('<head><meta', '<head>\n\t<meta')
     <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
     <html xmlns="http://www.w3.org/1999/xhtml">

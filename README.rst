@@ -21,9 +21,6 @@ Status
 
 Unreleased.
 
-Requires an as of yet unreleased version of plone.app.blocks or tests will break
-because they need plone.app.blocks#07f6fc2a7a660de519f3c4bcfe146d4e7cb57f65.
-
 .. image:: https://secure.travis-ci.org/collective/collective.dynamicmosaic?branch=master
     :alt: Travis CI badge
     :target: http://travis-ci.org/collective/collective.dynamicmosaic

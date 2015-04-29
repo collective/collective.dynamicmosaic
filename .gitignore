@@ -9,3 +9,6 @@ bin/
 buildout-cache/
 develop-eggs
 parts/
+include/
+lib/
+local/

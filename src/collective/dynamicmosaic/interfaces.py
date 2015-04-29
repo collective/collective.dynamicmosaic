@@ -1,4 +1,5 @@
 from zope.interface import Interface
+from plone.app.blocks.interfaces import IBlocksTransformEnabled
 
 
 class IDynamicMosaicLayer(Interface):
@@ -7,7 +8,7 @@ class IDynamicMosaicLayer(Interface):
     """
 
 
-class IDynamicMosaicEnabled(Interface):
+class IDynamicMosaicEnabled(IBlocksTransformEnabled):
     """Marker interface for content or site layouts for which tile id
     substitution should take place.
     """
